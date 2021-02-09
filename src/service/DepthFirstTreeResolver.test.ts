@@ -5,15 +5,18 @@ import { DebugLoggerFactory } from "../utils/DebugLoggerFactory";
 import { DepthFirstTreeResolver } from "./DepthFirstTreeResolver";
 import { MockPackageResolver } from "../../test/fixtures/MockPackageResolver";
 import { MockVersionResolver } from "../../test/fixtures/MockVersionResolver";
+import { SimplePromisePool } from "../utils/SimplePromisePool";
+
 
 function createMocks(allowRepeatTraversal: boolean = false) {
+  const promisePool = new SimplePromisePool(new DebugLoggerFactory(), 1);
   const packageResolver = new MockPackageResolver();
   const versionResolver = new MockVersionResolver();
   const treeResolver = new DepthFirstTreeResolver(
     new DebugLoggerFactory(),
     packageResolver,
     versionResolver,
-    1, // concurrency
+    promisePool,
     allowRepeatTraversal
   );
   return { packageResolver, versionResolver, treeResolver };

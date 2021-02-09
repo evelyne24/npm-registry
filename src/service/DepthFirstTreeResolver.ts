@@ -9,7 +9,7 @@ import { PackageResolver } from "./PackageResolver";
 import { TreeResolver } from "./TreeResolver";
 import { VersionResolver } from "./VersionResolver";
 import { NotFoundError } from "restify-errors";
-import Bluebird = require("bluebird");
+import { PromisePool } from "../utils/PromisePool";
 
 interface ParentPackage {
   parentName: string;
@@ -45,7 +45,6 @@ class TraversalHistory {
 @injectable()
 export class DepthFirstTreeResolver implements TreeResolver {
   private readonly log: Logger;
-  private readonly maxConcurrency: number;
   private readonly allowRepeatTraversal: boolean;
 
   constructor(
@@ -54,15 +53,13 @@ export class DepthFirstTreeResolver implements TreeResolver {
     private readonly packageResolver: PackageResolver,
     @inject("VersionResolver")
     private readonly versionResolver: VersionResolver,
-    @inject("config.maxConcurrency")
-    @optional()
-    maxConcurrency?: number,
+    @inject("PromisePool")
+    private readonly promisePool: PromisePool,
     @inject("config.allowRepeatTraversal")
     @optional()
     allowRepeatTraversal?: boolean
   ) {
     this.log = loggerFactory.getLogger(DepthFirstTreeResolver.name);
-    this.maxConcurrency = maxConcurrency || 1;
     this.allowRepeatTraversal = allowRepeatTraversal || false;
   }
 
@@ -123,34 +120,66 @@ export class DepthFirstTreeResolver implements TreeResolver {
       );
     }
 
-    traversalHistory.add(
-      name,
-      version,
-      parentName,
-      parentVersion
-    );
+    traversalHistory.add(name, version, parentName, parentVersion);
 
     const dependencies = level1.versions[version].dependencies || {};
 
-    const subtree = await Bluebird.map(
-      Object.keys(dependencies),
-      async (key: string) => {
-        const dependency = await this.getDependency.bind(this)(
-          key,
-          dependencies[key],
-          name,
-          version,
-          traversalHistory
-        );
-        return {
-          name: key,
-          dependency,
-        };
-      },
-      {
-        concurrency: this.maxConcurrency,
-      }
-    );
+    const promises: Promise<any>[] = [];
+    for (const dependencyName in dependencies) {
+      promises.push(
+        this.promisePool.enqueue(async () => {
+          this.log.debug(
+            "Beginning to get dependency %s of %s",
+            dependencyName,
+            name
+          );
+          try {
+            const dependency = await this.getDependency(
+              dependencyName,
+              dependencies[dependencyName],
+              name,
+              version,
+              traversalHistory
+            );
+            this.log.info("Got dependency %s of %s", dependencyName, name);
+            return {
+              name: dependencyName,
+              dependency,
+            };
+          } catch (error) {
+            this.log.error(
+              error,
+              "Failed to get dependency %s of %s",
+              dependencyName,
+              name
+            );
+            throw error;
+          }
+        })
+      );
+    }
+
+    const subtree = await Promise.all(promises);
+
+    // const subtree = await Bluebird.map(
+    //   Object.keys(dependencies),
+    //   async (key: string) => {
+    //     const dependency = await this.getDependency.bind(this)(
+    //       key,
+    //       dependencies[key],
+    //       name,
+    //       version,
+    //       traversalHistory
+    //     );
+    //     return {
+    //       name: key,
+    //       dependency,
+    //     };
+    //   },
+    //   {
+    //     concurrency: this.maxConcurrency,
+    //   }
+    // );
 
     return subtree.reduce((tree, { name, dependency }) => {
       tree[name] = dependency;

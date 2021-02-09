@@ -15,6 +15,8 @@ import { CachedPackageResolver } from "./service/CachedPackageResolver";
 import { SemverVersionResolver } from "./service/SemverVersionResolver";
 import { VersionResolver } from "./service/VersionResolver";
 import { DisplayDependencyTree } from "./controllers/DisplayDependencyTree";
+import { SimplePromisePool } from "./utils/SimplePromisePool";
+import { PromisePool } from "./utils/PromisePool";
 
 const container = new Container();
 
@@ -57,6 +59,11 @@ container
 container
   .bind<VersionResolver>("VersionResolver")
   .to(SemverVersionResolver)
+  .inSingletonScope();
+
+container
+  .bind<PromisePool>("PromisePool")
+  .to(SimplePromisePool)
   .inSingletonScope();
 
 export default container;
