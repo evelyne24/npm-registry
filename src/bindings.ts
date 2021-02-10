@@ -15,6 +15,7 @@ import { CachedPackageResolver } from "./service/CachedPackageResolver";
 import { SemverVersionResolver } from "./service/SemverVersionResolver";
 import { VersionResolver } from "./service/VersionResolver";
 import { DisplayDependencyTree } from "./controllers/DisplayDependencyTree";
+import { BreadthFirstTreeResolver } from "./service/BreadthFirstTreeResolver";
 
 const container = new Container();
 
@@ -39,9 +40,14 @@ container
   .to(DisplayDependencyTree)
   .inSingletonScope();
 
+// container
+//   .bind<TreeResolver>("TreeResolver")
+//   .to(DepthFirstTreeResolver)
+//   .inSingletonScope();
+
 container
   .bind<TreeResolver>("TreeResolver")
-  .to(DepthFirstTreeResolver)
+  .to(BreadthFirstTreeResolver)
   .inSingletonScope();
 
 container
