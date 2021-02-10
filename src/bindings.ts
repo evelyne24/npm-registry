@@ -15,11 +15,18 @@ import { CachedPackageResolver } from "./service/CachedPackageResolver";
 import { SemverVersionResolver } from "./service/SemverVersionResolver";
 import { VersionResolver } from "./service/VersionResolver";
 import { DisplayDependencyTree } from "./controllers/DisplayDependencyTree";
+import { VulnerabilityStore } from "./stores/VulnerabilityStore";
+import { HardcodedVulnerabilityStore } from "./stores/HardcodedVulnerabilityStore";
+import { VulnerabilityChecker } from "./service/VulnerabilityChecker";
+import { SimpleVulnerabilityChecker } from "./service/SimpleVulnerabilityChecker";
+import { GetVulnerabilities } from "./controllers/GetVulnerabilities";
+import { TreeFlattener } from "./service/TreeFlattener";
+import { DepthFirstTreeFlattener } from "./service/DepthFirstTreeFlattener";
 
 const container = new Container();
 
 container.bind<number>("config.server.port").toConstantValue(3000);
-container.bind<boolean>("config.allowRepeatTraversal").toConstantValue(false);
+container.bind<boolean>("config.allowRepeatTraversal").toConstantValue(true);
 
 container.bind<Server>("Server").to(ExpressServer).inSingletonScope();
 
@@ -32,6 +39,11 @@ container
 container
   .bind<Controller>("Controller")
   .to(GetDependencyTree)
+  .inSingletonScope();
+
+container
+  .bind<Controller>("Controller")
+  .to(GetVulnerabilities)
   .inSingletonScope();
 
 container
@@ -57,6 +69,21 @@ container
 container
   .bind<VersionResolver>("VersionResolver")
   .to(SemverVersionResolver)
+  .inSingletonScope();
+
+container
+  .bind<TreeFlattener>("TreeFlattener")
+  .to(DepthFirstTreeFlattener)
+  .inSingletonScope();
+
+container
+  .bind<VulnerabilityStore>("VulnerabilityStore")
+  .to(HardcodedVulnerabilityStore)
+  .inSingletonScope();
+
+container
+  .bind<VulnerabilityChecker>("VulnerabilityChecker")
+  .to(SimpleVulnerabilityChecker)
   .inSingletonScope();
 
 export default container;

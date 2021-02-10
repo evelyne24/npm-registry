@@ -10,6 +10,17 @@ export interface DependencyTree {
   dependencies: Dependencies;
 }
 
+export interface DependencyBreadcrumb {
+  name: string;
+  version: string;
+  resolvedVersion: string;
+  parents: string[];
+}
+
+export interface DependencyBreadcrumbMap {
+  [name: string]: DependencyBreadcrumb[];
+}
+
 export function isTree(value: any): value is DependencyTree {
   return value.name && value.dependencies;
 }

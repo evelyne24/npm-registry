@@ -1,0 +1,58 @@
+{
+  "name": "react",
+  "version": "15.0.2",
+  "resolvedVersion": "15.0.2",
+  "dependencies": {
+    "fbjs": {
+      "name": "fbjs",
+      "version": "^0.8.0",
+      "resolvedVersion": "0.8.17",
+      "dependencies": {
+        "core-js": {
+          "name": "core-js",
+          "version": "^1.0.0",
+          "resolvedVersion": "1.2.7",
+          "dependencies": {}
+        },
+        "loose-envify": {
+          "name": "loose-envify",
+          "version": "^1.0.0",
+          "resolvedVersion": "1.4.0",
+          "dependencies": {
+            "js-tokens": {
+              "name": "js-tokens",
+              "version": "^3.0.0 || ^4.0.0",
+              "resolvedVersion": "4.0.0",
+              "dependencies": {}
+            }
+          }
+        },
+        "object-assign": {
+          "name": "object-assign",
+          "version": "^4.1.0",
+          "resolvedVersion": "4.1.1",
+          "dependencies": {}
+        }
+      }
+    },
+    "loose-envify": {
+      "name": "loose-envify",
+      "version": "^1.1.0",
+      "resolvedVersion": "1.4.0",
+      "dependencies": {
+        "js-tokens": {
+          "name": "js-tokens",
+          "version": "^3.0.0 || ^4.0.0",
+          "resolvedVersion": "4.0.0",
+          "dependencies": {}
+        }
+      }
+    },
+    "object-assign": {
+      "name": "object-assign",
+      "version": "^4.0.1",
+      "resolvedVersion": "4.1.1",
+      "dependencies": {}
+    }
+  }
+}
